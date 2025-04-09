@@ -3,10 +3,10 @@ import { ChangeEvent, useState } from "react";
 
 export default function SelectCity() {
     const [city, setCity] = useState("");
-    const [cityData, setCityData] = useState({city: '', country: ''});
+    const [cityData, setCityData] = useState({ city: '', country: '' });
     const [error, setError] = useState('');
-    const cities: { name: string; country: string }[] = getEuropeanCapitals();
-
+    const [cities, setCities] = useState(getEuropeanCapitals());
+   
     const handleCityChange = (event: ChangeEvent<HTMLInputElement>) => {
         setCity(event.target.value);
     }
@@ -21,20 +21,26 @@ export default function SelectCity() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         catch (err: any) {
             setError(err.message);
-            setCityData({ city: '', country: ''});
+            setCityData({ city: '', country: '' });
         }
     }
-
+  
     return <div>
-        <input
-            type="text"
-            value={city}
-            onChange={handleCityChange}
-            placeholder="Wpisz nazwę miasta"
-        />
-        <button onClick={fetchCity}>
-            Szukaj
-        </button>
+        <form onSubmit={(e) => e.preventDefault()}>
+            <input
+                type="text"
+                value={city}
+                onChange={handleCityChange}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onKeyUp={(e: any) =>
+                    setCities(getEuropeanCapitals().filter((city) => city.name.toLowerCase().includes(e.currentTarget.value.toLowerCase())))
+                }
+                placeholder="Wpisz nazwę miasta"
+            />
+            <button onClick={fetchCity}>
+                Szukaj
+            </button>
+        </form>
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
         {cityData && (
@@ -45,14 +51,14 @@ export default function SelectCity() {
                 <p>Opis: {cityData.description}</p> */}
             </div>
         )}
-        <select>
+        <ul>
             {cities.map((city) => (
-                <option key={city.name}
+                <li key={city.name}
                     onChange={async () => {
 
                     }}
-                >{city.name}</option>
+                >{city.name}</li>
             ))}
-        </select>
+        </ul>
     </div>
 }
