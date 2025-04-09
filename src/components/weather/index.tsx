@@ -21,7 +21,7 @@ export default function Weather({ city }: { city: string }) {
   }, [API_KEY, city]);
 
   if (!weather) return <p>Ładowanie pogody...</p>;
-  console.log(weather);
+
   return (
     <div>
       <h2>Pogoda w {weather.name}</h2>
