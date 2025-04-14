@@ -13,6 +13,7 @@ export default function SelectCity() {
     const [cities, setCities] = useState(getEuropeanCapitals());
     const handleCityChange = (event: ChangeEvent<HTMLInputElement>) => {
         setCity(event.target.value);
+        sessionStorage.setItem('city', event.target.value);
     }
     const fetchCity = async () => {
         try {
@@ -53,7 +54,7 @@ export default function SelectCity() {
         <div className={style.cities}>
             {cities.map((city) => (
                 <Link
-                    href={`/blog/${city.name}`}
+                    href={`/city/${city.name}`}
                     key={city.name}
                     className={style.city}
                     onMouseDown={() => {
