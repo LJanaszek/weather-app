@@ -1,3 +1,18 @@
 *{
     font-family: sans-serif;
 }
+.logout{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 4rem;
+    right: 1em;
+    h1{
+        font-size: 16px;
+        font-weight: normal;
+        span{
+            font-weight: 800;
+        }
+    }
+}

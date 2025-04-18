@@ -4,7 +4,9 @@ import style from "@/styles/weather.module.scss"
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/router";
 import AddIcon from '@mui/icons-material/Add';
-
+import { Button, TextField } from "@mui/material";
+import Textarea from '@mui/joy/Textarea';
+import Popup from "../Popup";
 
 type PixabayPhoto = {
   id: string;
@@ -14,11 +16,16 @@ type PixabayPhoto = {
   user: string;          // Photographer's name
 };
 
+interface Notes {
+  id: string;
+  description: string;
+  createdAt: string;
+}
 
 export default function Weather() {
 
   const router = useRouter();
-  const notes = [{ id: 1, text: 'Lorem ipsum dolor sit amet consectetur adipiscing elit', date: '2023-05-01' }, { id: 2, text: 'Note 2', date: '2023-05-02' }];
+  const [notes, setNotes] = useState<Notes[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [weather, setWeather] = useState<any>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
@@ -27,14 +34,17 @@ export default function Weather() {
   const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY;
   const accessKey = process.env.NEXT_PUBLIC_PIXABAY_API_KEY;
   const { index } = router.query;
+  const [inputValue, setInputValue] = useState('');
+  const [search, setSearch] = useState('');
+  const [editedNote, setEditedNote] = useState("");
+  const [openPopup, setOpenPopup] = useState(false);
+  const [currentNoteId, setCurrentNoteId] = useState("");
 
   useEffect(() => {
     if (index) {
       sessionStorage.setItem('index', index as string);
     }
   }, [index]);
-
-  console.log("index:", index);
 
 
   useEffect(() => {
@@ -50,7 +60,6 @@ export default function Weather() {
       const fetchPhotos = async () => {
         try {
           // Debugging: Log the API URL
-          console.log(`Fetching: https://pixabay.com/api/?key=${accessKey}&q=${index}&image_type=photo&orientation=horizontal`);
 
           const response = await fetch(
             `https://pixabay.com/api/?key=${accessKey}&q=${index}&image_type=photo&orientation=horizontal`,
@@ -75,6 +84,58 @@ export default function Weather() {
     }
   }, [API_KEY, index]);
 
+
+  useEffect(() => {
+    console.log(index);
+    if(!index) return
+
+    fetch(`/api/notes/${index}`, {
+      method: 'GET',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (search) {
+          data = data.filter((note: Notes) => note.description.toLowerCase().includes(search.toLowerCase()));
+        }
+
+        setNotes(data);
+      })
+  }, [isNotesOpen, search, index]);
+  async function addNotes() {
+    await fetch('/api/notes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        description: inputValue,
+        city: index
+      }),
+    });
+
+    setIsNotesOpen(!isNotesOpen);
+    setInputValue('');
+  }
+
+  async function deleteNotes(id: string) {
+    await fetch(`/api/notes/${id}`, {
+      method: 'DELETE',
+    });
+    setIsNotesOpen(!isNotesOpen);
+  }
+  async function updateNotes(id: string) {
+    await fetch(`/api/notes/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        description: editedNote
+      }),
+    });
+    setIsNotesOpen(!isNotesOpen);
+  }
+
   if (!weather) return <p>Ładowanie pogody...</p>;
 
   return (
@@ -89,7 +150,7 @@ export default function Weather() {
           className={style.weatherContainer}
         >
           <div className={style.weatherInfo}>
-            <p>Date: {new Date().toISOString().split('T')[0]+" "+ new Date().getHours()+":"+new Date().getMinutes()}</p>
+            <p>Date: {new Date().toISOString().split('T')[0] + " " + new Date().getHours() + ":" + new Date().getMinutes()}</p>
             <p className={style.temp}>Temperatura: {weather.main.temp}°C</p>
             <p className={style.description}>Opis: {weather.weather[0].description}</p>
             <p className={style.wind}>Wiatr: {weather.wind.speed} m/s</p>
@@ -98,26 +159,117 @@ export default function Weather() {
       }
       {error && <p>{error}</p>}
       <div className={style.notes}>
-        <nav>
+        <nav className={style.notesNav}>
+
           <h2>Notatki</h2>
-          <button className={style.add} onClick={() => setIsNotesOpen(true)}>
+
+          <TextField
+            id="outlined-basic"
+            label="wyszukaj notatki"
+            variant="outlined"
+            sx={{
+              width: '30vw',
+              position: 'absolute',
+              right: 'calc(50% - 15vw)',
+            }}
+            onChange={(e: { target: { value: string; }; }) => {
+              setSearch(e.target.value);
+              setNotes(notes.filter((note) =>
+                note.description.toLowerCase().includes(e.target.value)
+
+              ))
+              // console.log(notes.filter((note) => note.description.toLowerCase().includes(e.target.value)))
+            }}
+
+          >
+          </TextField>
+          {/* <button className={style.add} onClick={() => setIsNotesOpen(true)}>
             <AddIcon />
-          </button>
+          </button> */}
         </nav>
-        {notes.map((note) => (
-          <div key={note.id} className={style.note}>
-            <p className={style.date}>{note.date}</p>
-            <p className={style.text}>{note.text}</p>
-          </div>
-        ))}
-        {isNotesOpen &&
-          <div className={style.notes}>
+        <div className={style.notesAdd}>
 
-            <textarea name="" id="">
-            </textarea>
-          </div>
+          <Textarea
+            minRows={3}
+            placeholder="Dodaj notatke"
+            sx={{
+              width: '100%',
+            }}
+            name=""
+            value={inputValue}
+            id="addNote"
+            defaultValue={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}>
+          </Textarea>
 
+        </div>
+        <Button
+          className={style.addButton}
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            setIsNotesOpen(!isNotesOpen)
+            addNotes();
+          }}>Dodaj</Button>
+
+
+
+        <div className={style.notesContainer}>
+          {notes.map((note) => {
+            return <div key={note.id as string} className={style.note}>
+              <div>
+                <p className={style.date}>{note.createdAt.split('T')[0]}</p>
+                <p className={style.text}>{note.description as string}</p>
+              </div>
+              <nav className={style.buttons}>
+                <button className={style.delete}
+                  onClick={() => deleteNotes(note.id as string)}
+                >Usun</button>
+                <button className={style.edit}
+                  onClick={() => {
+                    setCurrentNoteId(note.id as string);
+                    setEditedNote(note.description as string)
+                    setOpenPopup(true);
+                  }}
+                >Edytuj</button>
+              </nav>
+            </div>
+          })}
+        </div>
+        {openPopup &&
+          <Popup>
+            <div className={style.popup}>
+              <h2>Edytuj notatke</h2>
+              <Textarea
+                minRows={3}
+                onChange={(e: { target: { value: string; }; }) => setEditedNote(e.target.value)}
+                placeholder={editedNote}
+                value={editedNote}
+              ></Textarea>
+              <nav>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setOpenPopup(false);
+                    updateNotes(currentNoteId as string)
+                  }}>
+                  Zapisz
+                </Button>
+                <Button
+                  variant="text"
+                  color="warning"
+                  onClick={() => setOpenPopup(false)}>
+                  Anuluj
+                </Button>
+              </nav>
+            </div>
+          </Popup>
         }
+        {/* {isNotesOpen && */}
+
+
+        {/* } */}
 
       </div>
     </div >
