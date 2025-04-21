@@ -20,5 +20,5 @@ export const authenticateUser = (req, res) => {
         return res.status(401).json({ message: "Invalid user" });
     }
 
-    return reqUser;
+    return res.json(reqUser);
 };
