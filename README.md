@@ -9,7 +9,7 @@
 ```
 src/pages/api/description
 ```
-##### w api zawarta obsługa błędów 200, 202, 400, 404
+##### w api zawarta obsługa błędów 200, 400, 401, 403 404, inne kody błędów (jeżeli potrzeba)
 #### Open Api Documentation
 [Open API Documentation](https://learn.openapis.org/)
 ## Pierwsze odpalenie projektu

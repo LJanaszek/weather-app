@@ -1,4 +1,3 @@
-
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { authenticateUser } from "../authenticateUser";
@@ -13,8 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!['POST', 'GET', 'DELETE'].includes(req.method)) return res.status(405).json({ message: `Method ${req.method} Not Allowed` });
 
     const { description, city } = req.body;
-    
     if (req.method === 'POST') {
+        console.log(description);
 
         if (typeof description !== 'string' && typeof city !== 'string') {
             return res.status(400).json({ message: 'Bad request' });

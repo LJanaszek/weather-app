@@ -102,7 +102,7 @@ export default function Weather() {
       })
   }, [isNotesOpen, search, index]);
   async function addNotes() {
-    await fetch('/api/notes', {
+    const res = await fetch(`/api/notes/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -112,7 +112,12 @@ export default function Weather() {
         city: index
       }),
     });
-
+    if (res.status === 201) {
+      console.log('Dodano notatke');
+    }
+    if (res.status === 409) {
+      console.log('Notatka juz istnieje');
+    }
     setIsNotesOpen(!isNotesOpen);
     setInputValue('');
   }
@@ -178,14 +183,11 @@ export default function Weather() {
                 note.description.toLowerCase().includes(e.target.value)
 
               ))
-              // console.log(notes.filter((note) => note.description.toLowerCase().includes(e.target.value)))
+             
             }}
 
           >
           </TextField>
-          {/* <button className={style.add} onClick={() => setIsNotesOpen(true)}>
-            <AddIcon />
-          </button> */}
         </nav>
         <div className={style.notesAdd}>
 
@@ -198,7 +200,7 @@ export default function Weather() {
             name=""
             value={inputValue}
             id="addNote"
-            defaultValue={inputValue}
+            
             onChange={(e) => setInputValue(e.target.value)}>
           </Textarea>
 
@@ -215,7 +217,8 @@ export default function Weather() {
 
 
         <div className={style.notesContainer}>
-          {notes.map((note) => {
+          {notes.length>0 &&notes.map((note) => {
+            console.log(notes);
             return <div key={note.id as string} className={style.note}>
               <div>
                 <p className={style.date}>{note.createdAt.split('T')[0]}</p>
@@ -235,6 +238,9 @@ export default function Weather() {
               </nav>
             </div>
           })}
+          {
+            notes.length === 0 && <p>Brak notatek</p>
+          }
         </div>
         {openPopup &&
           <Popup>

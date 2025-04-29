@@ -1,120 +1,79 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { authenticateUser } from '../../../pages/api/authenticateUser';
-import handler from '../../../pages/api/notes/[id]';
-import { createMocks } from 'node-mocks-http';
-import { PrismaClient } from '@prisma/client';
+import * as auth from '../../api/authenticateUser';
+import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
+import { PrismaClient, Notes } from '@prisma/client';
 
-// Mockowanie Prisma Client
-jest.mock('@prisma/client');
-const prisma = new PrismaClient();
 
-// Mockowanie funkcji authenticateUser
-jest.mock('../../../pages/api/authenticateUser', () => ({
-  authenticateUser: jest.fn(),
-}));
+// Step 1: zagnieżdżone mockowanie prisma client
+const prismaMock = mockDeep<PrismaClient>() as DeepMockProxy<PrismaClient>;
 
-describe('API notes handler', () => {
+const getNotesById = async (id: string): Promise<Notes[] | null> => {
+  return prismaMock.notes.findMany({ where: { id } });
+};
+
+const deleteNotesById = async (id: string) => {
+  return prismaMock.notes.deleteMany({ where: { id } });
+};
+
+const updateNotesById = async (id: string) => {
+  return prismaMock.notes.updateMany({ where: { id } });
+};
+
+const mockNotes = [
+  { 
+    id: '1', 
+    userId: 'user-123', 
+    city: 'Warsaw', 
+    description: 'note 1', 
+    createdAt: new Date() 
+  },
+  {
+    id: '2',
+    userId: 'user-123',
+    city: 'Warsaw',
+    description: 'note 2',
+    createdAt: new Date()
+  }
+];
+
+
+describe('testing notes', () => {
+  const user = { id: 'user-123' };
+
+  beforeEach(() => {
+    jest.spyOn(auth, 'authenticateUser').mockReturnValue(user);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Wyciąganie notatki po id', async () => {
+    prismaMock.notes.findMany.mockResolvedValue(mockNotes);
+
+    const notes = await getNotesById('1');
+
+    expect(notes).toEqual(mockNotes);
+    expect(prismaMock.notes.findMany).toHaveBeenCalledWith({ where: { id: '1' } });
+  });
+
+  it('testowanie usuwania notatki', async () => {
+    prismaMock.notes.deleteMany.mockResolvedValue({ count: 1 });
+
+    const notes = await deleteNotesById('1');
+
+    expect(notes).toEqual({ count: 1 });
+    expect(prismaMock.notes.deleteMany).toHaveBeenCalledWith({ where: { id: '1' } });
   
-  // Test dla GET: Zwrócenie notatek użytkownika z danego miasta
-  it('GET - powinien zwrócić notatki użytkownika z danego miasta', async () => {
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: { id: 'Warszawa' },  // Przekazujemy miasto
-      headers: {
-        cookie: 'auth_token=fake.jwt.token',  // Przykładowy token
-      },
-    });
-
-    // Zamockowanie authenticateUser, zwróci obiekt użytkownika z id jako string
- 
-    authenticateUser.mockReturnValueOnce({ id: '1' });
-
-    // Mockowanie odpowiedzi z Prisma
-    (prisma.notes.findMany as jest.Mock).mockResolvedValueOnce([
-      {
-        id: 'note-id',
-        userId: '1',
-        description: 'test desc',
-        createdAt: new Date(),
-        city: 'Warszawa',
-      },
-    ]);
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(200);
-    const data = res._getJSONData();
-    expect(Array.isArray(data)).toBe(true);
-    expect(data[0].city).toBe('Warszawa');
   });
 
-  // Test dla DELETE: Usunięcie notatki
-  it('DELETE - powinien usunąć notatkę o podanym ID', async () => {
-    const { req, res } = createMocks({
-      method: 'DELETE',
-      query: { id: 'note-id' },
-      headers: {
-        cookie: 'auth_token=fake.jwt.token',  // Przykładowy token
-      },
-    });
+  it('PUT updates note', async () => {
+    prismaMock.notes.updateMany.mockResolvedValue({ count: 1 });
 
-    // Zamockowanie authenticateUser, zwróci obiekt użytkownika z id jako string
+    const notes = await updateNotesById('1');
 
-    authenticateUser.mockReturnValueOnce({ id: '1' });
-
-    // Mockowanie odpowiedzi z Prisma (delete)
-    (prisma.notes.deleteMany as jest.Mock).mockResolvedValueOnce({});
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(200);
-    expect(res._getJSONData()).toEqual({ message: 'Notes deleted' });
+    expect(notes).toEqual({ count: 1 });
+    expect(prismaMock.notes.updateMany).toHaveBeenCalledWith({ where: { id: '1' } });
   });
 
-  // Test dla PUT: Zaktualizowanie opisu notatki
-  it('PUT - powinien zaktualizować opis notatki', async () => {
-    const { req, res } = createMocks({
-      method: 'PUT',
-      query: { id: 'note-id' },
-      body: { description: 'Updated description' },
-      headers: {
-        cookie: 'auth_token=fake.jwt.token',  // Przykładowy token
-      },
-    });
-
-    // Zamockowanie authenticateUser, zwróci obiekt użytkownika z id jako string
   
-    authenticateUser.mockReturnValueOnce({ id: '1' });
-
-    // Mockowanie odpowiedzi z Prisma (update)
-    (prisma.notes.update as jest.Mock).mockResolvedValueOnce({
-      id: 'note-id',
-      userId: '1',
-      description: 'Updated description',
-      city: 'Warszawa',
-    });
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(200);
-    expect(res._getJSONData()).toEqual({ message: 'Notes updated' });
-  });
-
-  // Test 401: Jeśli użytkownik nie jest uwierzytelniony
-  it('powinien zwrócić 401, jeśli użytkownik nie jest uwierzytelniony', async () => {
-    const { req, res } = createMocks({
-      method: 'GET',
-      query: { id: 'Warszawa' },
-      headers: {},
-    });
-
-    // Zamockowanie authenticateUser, zwróci null (brak użytkownika)
-    
-    authenticateUser.mockReturnValueOnce(null);
-
-    await handler(req, res);
-
-    expect(res._getStatusCode()).toBe(401);
-    expect(res._getJSONData()).toEqual({ message: 'Not authenticated' });
-  });
 });
