@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.query;
     const { description } = req.body;
 
-    const reqUser = authenticateUser(req, res);
+    const reqUser = await authenticateUser(req, res);
     if (!reqUser) return;
 
     if (req.method === 'GET') {
