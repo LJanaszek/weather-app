@@ -84,22 +84,27 @@ export default function Weather() {
     }
   }, [API_KEY, index]);
 
-
-  useEffect(() => {
-    console.log(index);
+  const fetchAllNotes = async () => {
     if(!index) return
-
-    fetch(`/api/notes/${index}`, {
+    const res = await fetch(`/api/notes/${index}`, {
       method: 'GET',
     })
-      .then((res) => res.json())
-      .then((data) => {
-        if (search) {
-          data = data.filter((note: Notes) => note.description.toLowerCase().includes(search.toLowerCase()));
-        }
+    if (res.status === 200) {
+      let data = await res.json();
+      if (search) {
+        data = data.filter((note: Notes) => note.description.toLowerCase().includes(search.toLowerCase()));
+      }
+      setNotes(data);
+    }
 
-        setNotes(data);
-      })
+    if (res.status === 404) {
+      console.log('Brak notatek');
+    }
+  };
+
+  useEffect(() => {
+    fetchAllNotes();
+    
   }, [isNotesOpen, search, index]);
   async function addNotes() {
     const res = await fetch(`/api/notes/`, {
@@ -120,6 +125,7 @@ export default function Weather() {
     }
     setIsNotesOpen(!isNotesOpen);
     setInputValue('');
+    fetchAllNotes();
   }
 
   async function deleteNotes(id: string) {
@@ -145,6 +151,7 @@ export default function Weather() {
 
   return (
     <div className={style.weather}>
+      
       <h1>{index}</h1>
       {!weather.main.temp && <p>Ładowanie pogody...</p>}
       {weather.main.temp && !error &&
@@ -238,9 +245,6 @@ export default function Weather() {
               </nav>
             </div>
           })}
-          {
-            notes.length === 0 && <p>Brak notatek</p>
-          }
         </div>
         {openPopup &&
           <Popup>

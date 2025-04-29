@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 
-    const reqUser = authenticateUser(req, res);
+    const reqUser = await authenticateUser(req, res);
     if (!reqUser) return;
 
     if (!['POST', 'GET', 'DELETE'].includes(req.method)) return res.status(405).json({ message: `Method ${req.method} Not Allowed` });

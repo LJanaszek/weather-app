@@ -47,22 +47,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
-    // if (req.method === 'PUT') {
-    //     try {
-    //         await prisma.notes.update({
-    //             where: {
-    //                 id: String(id)
-    //             },
-    //             data: {
-    //                 description: description
-    //             }
+    if (req.method === 'PUT') {
+        try {
+            await prisma.notes.update({
+                where: {
+                    id: String(id)
+                },
+                data: {
+                    description: description
+                }
 
-    //         })
-    //         return res.status(200).json({ message: 'Notes updated' });
+            })
+            return res.status(200).json({ message: 'Notes updated' });
 
-    //     } catch (error) {
-    //         return res.status(500).json({ message: error.message });
-    //     }
-    // }
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    }
 
 }

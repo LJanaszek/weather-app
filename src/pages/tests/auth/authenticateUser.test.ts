@@ -49,8 +49,10 @@ describe('authenticateUser', () => {
     // Sprawdzamy, czy status odpowiedzi jest poprawny (np. 200)
     expect(res.statusCode).toBe(200);
 
+    const user = await authenticateUser(req, res);
+
     // Sprawdzamy, czy odpowiedź zawiera dane użytkownika
-    expect(res._getJSONData()).toEqual(mockUser);
+    expect(user).toEqual(mockUser);
   });
 
 });
