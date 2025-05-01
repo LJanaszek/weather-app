@@ -23,22 +23,38 @@ const CityGallery: React.FC<CityGalleryProps> = ({ city, children, onMouseDown, 
 
     useEffect(() => {
         // Debugging: Log the access key to see if it's loaded properly
-        console.log("Pixabay Access Key:", accessKey);
 
         const fetchPhotos = async () => {
             try {
-                // Debugging: Log the API URL
-                console.log(`Fetching: https://pixabay.com/api/?key=${accessKey}&q=${city}&image_type=photo&orientation=horizontal`);
 
-                const response = await fetch(
+                const res = await fetch(
                     `https://pixabay.com/api/?key=${accessKey}&q=${city}&image_type=photo&orientation=horizontal`,
                 );
 
-                // Check if the response is OK
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                if (res.status === 200) {
+                    console.log('success');
+                }
+                else if (res.status === 400) {
+                    console.log('Bad request');
+                }
+                else if (res.status === 401) {
+                    console.log('something wrong with api key or with your subscription');
+                }
+                else if (res.status === 403) {
+                    console.log('access denied');
+                }
+                else if (res.status === 404) {
+                    console.log('city not found');
+                }
+                else if (res.status === 429) {
+                    console.log('too many requests');
+                }
+                else if (res.status === 500 || res.status === 502 || res.status === 503 || res.status === 504) {
+                    console.log('server error');
+                }
 
-                // Get the data from the response
-                const data = await response.json();
+
+                const data = await res.json();
                 setPhotos(data.hits); // "hits" contains the photo results in Pixabay API response
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (err: any) {
@@ -49,29 +65,27 @@ const CityGallery: React.FC<CityGalleryProps> = ({ city, children, onMouseDown, 
         };
 
         fetchPhotos();
-    }, [city]); // Re-fetch when city changes
+    }, [city]);
 
-    // Error state display
     if (error) {
-        return <p>⚠️ Błąd: {error}</p>;
+        return <p> Wystąpił Błąd: {error}</p>;
     }
 
-    // Render the photos
-    const firstPhoto = photos[0]; // Get the first photo in the array
+
+    const firstPhoto = photos[0]; 
 
     return (
         <div
-        style={{
-            width: "100%",
-        }}
+            style={{
+                width: "100%",
+            }}
         >
             {firstPhoto ? (
                 <div
                     onMouseUp={onMouseUp} onMouseDown={onMouseDown}
                     className={style.cityTemplate}
                     style={{
-                        backgroundImage: `url(${firstPhoto.webformatURL})`, // Use small image for fast loading
-                      
+                        backgroundImage: `url(${firstPhoto.webformatURL})`, 
                     }}
                 >
                     {children}

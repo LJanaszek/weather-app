@@ -18,7 +18,18 @@ export default function SelectCity() {
     const fetchCity = async () => {
         try {
             const res = await fetch(`/api/city?city=${city}`);
-            if (!res.ok) throw new Error('Cos poszlo nie tak');
+            if (res.status === 200){
+                console.log('success');
+            } 
+            if (res.status === 400){
+                console.log('Bad request');
+            }
+            if (res.status === 404){
+                console.log('City not found');
+            }
+            if (res.status === 405){
+                console.log('Method not allowed');
+            }
             setError('');
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

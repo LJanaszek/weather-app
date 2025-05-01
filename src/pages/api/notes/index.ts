@@ -13,7 +13,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { description, city } = req.body;
     if (req.method === 'POST') {
-        console.log(description);
 
         if (typeof description !== 'string' && typeof city !== 'string') {
             return res.status(400).json({ message: 'Bad request' });

@@ -29,7 +29,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       city: cityData.name,
       country: cityData.country
     });
-  } else {
+  }
+  else {
     // Obsługujemy tylko metodę GET
     return res.status(405).json({ error: 'Method Not Allowed' });
   }

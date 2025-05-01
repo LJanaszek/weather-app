@@ -34,8 +34,6 @@ export default function SignUp() {
             setPasswordErrorMessage('');
         }
         if (password.value !== repeatPassword.value) {
-            console.log(password.value);
-            console.log(repeatPassword.value);
             setRepeatPasswordError(true);
             setRepeatPasswordErrorMessage('Passwords do not match.');
             setIsValid(false);

@@ -55,25 +55,56 @@ export default function Weather() {
           `https://api.openweathermap.org/data/2.5/weather?q=${index}&appid=${API_KEY}&units=metric`
         );
         const data = await res.json();
+        if (res.status === 200){
+          console.log('success');
+        }
+        if (res.status === 401){
+          console.log('something wrong with api key or with your subscription');
+        }
+        if(res.status === 404){
+          console.log('city not found');
+        }
+        if (res.status === 429){
+          console.log('too many requests');
+        }
+        if (res.status === 500 || res.status === 502 || res.status === 503 || res.status === 504){
+          console.log('server error');
+        }
         setWeather(data);
       };
       const fetchPhotos = async () => {
         try {
-          // Debugging: Log the API URL
-
-          const response = await fetch(
+          const res = await fetch(
             `https://pixabay.com/api/?key=${accessKey}&q=${index}&image_type=photo&orientation=horizontal`,
           );
 
           // Check if the response is OK
-          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          if (res.status === 200) {
+            console.log('success');
+          }
+          if (res.status === 400){
+            console.log('Bad request');
+          }
+          if (res.status === 401){
+            console.log('something wrong with api key or with your subscription');
+          }
+          if(res.status === 403){
+            console.log('access denied');
+          }
+          if(res.status === 404){
+            console.log('city not found');
+          }
+          if (res.status === 429){
+            console.log('too many requests');
+          }
+          if (res.status === 500 || res.status === 502 || res.status === 503 || res.status === 504){
+            console.log('server error');
+          }
 
-          // Get the data from the response
-          const data = await response.json();
+          const data = await res.json();
           setPhotos(data.hits); // "hits" contains the photo results in Pixabay API response
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
-          // Handle errors and log them to the console
           console.error("Fetching error:", err);
           setError(err.message || "Coś poszło nie tak");
         }
@@ -85,27 +116,26 @@ export default function Weather() {
   }, [API_KEY, index]);
 
   const fetchAllNotes = async () => {
-    if(!index) return
+    if (!index) return
     const res = await fetch(`/api/notes/${index}`, {
       method: 'GET',
     })
     if (res.status === 200) {
+      console.log("notes has been fetched");
       let data = await res.json();
       if (search) {
         data = data.filter((note: Notes) => note.description.toLowerCase().includes(search.toLowerCase()));
       }
       setNotes(data);
     }
-
-    if (res.status === 404) {
-      console.log('Brak notatek');
-    }
   };
 
   useEffect(() => {
     fetchAllNotes();
-    
+
   }, [isNotesOpen, search, index]);
+
+
   async function addNotes() {
     const res = await fetch(`/api/notes/`, {
       method: 'POST',
@@ -118,10 +148,13 @@ export default function Weather() {
       }),
     });
     if (res.status === 201) {
-      console.log('Dodano notatke');
+      console.log('Note has been created');
     }
-    if (res.status === 409) {
-      console.log('Notatka juz istnieje');
+    if(res.status === 400) {
+      console.log('Podany został zły typ danych');
+    }
+    if(res.status === 405){
+      console.log('Method not allowed');
     }
     setIsNotesOpen(!isNotesOpen);
     setInputValue('');
@@ -129,13 +162,17 @@ export default function Weather() {
   }
 
   async function deleteNotes(id: string) {
-    await fetch(`/api/notes/${id}`, {
+    const res = await fetch(`/api/notes/${id}`, {
       method: 'DELETE',
     });
+    if (res.status === 200) {
+      console.log("note has been deleted")
+    }
+
     setIsNotesOpen(!isNotesOpen);
   }
   async function updateNotes(id: string) {
-    await fetch(`/api/notes/${id}`, {
+    const res = await fetch(`/api/notes/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -144,6 +181,9 @@ export default function Weather() {
         description: editedNote
       }),
     });
+    if (res.status === 200) {
+      console.log("note has been updated")
+    }
     setIsNotesOpen(!isNotesOpen);
   }
 
@@ -151,7 +191,7 @@ export default function Weather() {
 
   return (
     <div className={style.weather}>
-      
+
       <h1>{index}</h1>
       {!weather.main.temp && <p>Ładowanie pogody...</p>}
       {weather.main.temp && !error &&
@@ -190,7 +230,7 @@ export default function Weather() {
                 note.description.toLowerCase().includes(e.target.value)
 
               ))
-             
+
             }}
 
           >
@@ -207,7 +247,7 @@ export default function Weather() {
             name=""
             value={inputValue}
             id="addNote"
-            
+
             onChange={(e) => setInputValue(e.target.value)}>
           </Textarea>
 
@@ -224,8 +264,7 @@ export default function Weather() {
 
 
         <div className={style.notesContainer}>
-          {notes.length>0 &&notes.map((note) => {
-            console.log(notes);
+          {notes.length > 0 && notes.map((note) => {
             return <div key={note.id as string} className={style.note}>
               <div>
                 <p className={style.date}>{note.createdAt.split('T')[0]}</p>
@@ -234,12 +273,13 @@ export default function Weather() {
               <nav className={style.buttons}>
                 <button className={style.delete}
                   onClick={() => deleteNotes(note.id as string)}
-                >Usun</button>
+                >Delete</button>
                 <button className={style.edit}
                   onClick={() => {
                     setCurrentNoteId(note.id as string);
                     setEditedNote(note.description as string)
                     setOpenPopup(true);
+                    setNotes(notes.filter((note) => note.id !== note.id))
                   }}
                 >Edytuj</button>
               </nav>
