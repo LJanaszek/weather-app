@@ -3,112 +3,12 @@ import { OpenAPIObject } from 'openapi3-ts/oas30';
 export const swaggerDocument: OpenAPIObject = {
     openapi: '3.0.0',
     info: {
-        title: 'Moje API',
-        version: '1.0.0',
+        title: 'Weather-app Api Swagger',
+        version: '1.0.2',
     },
     paths: {
-        '/auth/logout': {
-            post: {
-                summary: 'Logout user',
-                description: 'Log out the user by removing the auth_token cookie.',
-                responses: {
-                    200: {
-                        description: 'Logged out successfully',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        message: { type: 'string', example: 'Logged out' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    401: {
-                        description: 'User not authenticated',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        message: { type: 'string', example: 'Not authenticated' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                security: [
-                    {
-                        "bearerAuth": [],
-                    },
-                ],
-            },
-        },
-        '/auth/login': {
-            post: {
-                summary: 'Logowanie użytkownika',
-                description: 'Zaloguj użytkownika za pomocą nazwy użytkownika i hasła. Jeśli dane są poprawne, zwróci token JWT.',
-                requestBody: {
-                    content: {
-                        'application/json': {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    username: { type: 'string' },
-                                    password: { type: 'string' },
-                                },
-                                required: ['username', 'password'],
-                            },
-                        },
-                    },
-                },
-                responses: {
-                    200: {
-                        description: 'Login successful',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        message: { type: 'string', example: 'Login successful' },
-                                        token: { type: 'string', description: 'JWT Token' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    400: {
-                        description: 'Nieprawidłowe dane logowania',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        message: { type: 'string', example: 'Username and password are required' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    401: {
-                        description: 'Niepoprawne dane logowania',
-                        content: {
-                            'application/json': {
-                                schema: {
-                                    type: 'object',
-                                    properties: {
-                                        message: { type: 'string', example: 'Invalid credentials' },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-        '/auth/register': {
+        
+        '/api/auth/user': {
             put: {
                 summary: 'Rejestracja użytkownika',
                 description: 'Rejestracja nowego użytkownika, weryfikacja danych, generowanie tokenu JWT.',
@@ -127,6 +27,7 @@ export const swaggerDocument: OpenAPIObject = {
                         },
                     },
                 },
+                tags: ['Auth'],
                 responses: {
                     201: {
                         description: 'Użytkownik został pomyślnie zarejestrowany',
@@ -170,11 +71,71 @@ export const swaggerDocument: OpenAPIObject = {
                     },
                 },
             },
-        },
-        '/auth/me': {
+            post: {
+                summary: 'Logowanie użytkownika',
+                description: 'Zaloguj użytkownika za pomocą nazwy użytkownika i hasła. Jeśli dane są poprawne, zwróci token JWT.',
+                requestBody: {
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    username: { type: 'string' },
+                                    password: { type: 'string' },
+                                },
+                                required: ['username', 'password'],
+                            },
+                        },
+                    },
+                },
+                tags: ['Auth'],
+                responses: {
+                    200: {
+                        description: 'Login successful',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string', example: 'Login successful' },
+                                        token: { type: 'string', description: 'JWT Token' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    400: {
+                        description: 'Nieprawidłowe dane logowania',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string', example: 'Username and password are required' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    401: {
+                        description: 'Niepoprawne dane logowania',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string', example: 'Invalid credentials' },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
             get: {
                 summary: 'Sprawdzenie stanu autoryzacji',
                 description: 'Weryfikacja tokenu JWT w ciasteczku i zwrócenie danych użytkownika.',
+                tags: ['Auth'],
                 responses: {
                     200: {
                         description: 'Token jest prawidłowy, zwrócono dane użytkownika',
@@ -216,38 +177,39 @@ export const swaggerDocument: OpenAPIObject = {
                 ],
             },
         },
-        '/protected-resource': {
-            get: {
-                summary: 'Zabezpieczony zasób',
-                description: 'Endpoint dostępny tylko dla użytkowników z ważnym tokenem JWT.',
+        '/api/auth/logout': {
+            post: {
+                summary: 'Logout user',
+                description: 'Log out the user by removing the auth_token cookie.',
                 responses: {
                     200: {
-                        description: 'Zasób został zwrócony pomyślnie',
+                        description: 'Logged out successfully',
                         content: {
                             'application/json': {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        message: { type: 'string', example: 'Protected resource' },
+                                        message: { type: 'string', example: 'Logged out' },
                                     },
                                 },
                             },
                         },
                     },
                     401: {
-                        description: 'Brak autoryzacji',
+                        description: 'User not authenticated',
                         content: {
                             'application/json': {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        message: { type: 'string' },
+                                        message: { type: 'string', example: 'Not authenticated' },
                                     },
                                 },
                             },
                         },
                     },
                 },
+                tags: ['Auth'],
                 security: [
                     {
                         "bearerAuth": [],
@@ -255,7 +217,46 @@ export const swaggerDocument: OpenAPIObject = {
                 ],
             },
         },
-        '/notes': {
+        // '/protected-resource': {
+        //     get: {
+        //         summary: 'Zabezpieczony zasób',
+        //         description: 'Endpoint dostępny tylko dla użytkowników z ważnym tokenem JWT.',
+        //         responses: {
+        //             200: {
+        //                 description: 'Zasób został zwrócony pomyślnie',
+        //                 content: {
+        //                     'application/json': {
+        //                         schema: {
+        //                             type: 'object',
+        //                             properties: {
+        //                                 message: { type: 'string', example: 'Protected resource' },
+        //                             },
+        //                         },
+        //                     },
+        //                 },
+        //             },
+        //             401: {
+        //                 description: 'Brak autoryzacji',
+        //                 content: {
+        //                     'application/json': {
+        //                         schema: {
+        //                             type: 'object',
+        //                             properties: {
+        //                                 message: { type: 'string' },
+        //                             },
+        //                         },
+        //                     },
+        //                 },
+        //             },
+        //         },
+        //         security: [
+        //             {
+        //                 "bearerAuth": [],
+        //             },
+        //         ],
+        //     },
+        // },
+        '/api/notes': {
             post: {
                 summary: 'Tworzenie nowej notatki',
                 description: 'Utwórz nową notatkę dla użytkownika.',
@@ -273,6 +274,7 @@ export const swaggerDocument: OpenAPIObject = {
                         },
                     },
                 },
+                tags: ['Notes'],
                 responses: {
                     201: {
                         description: 'Notatka utworzona',
@@ -307,6 +309,7 @@ export const swaggerDocument: OpenAPIObject = {
             get: {
                 summary: 'Pobieranie notatek użytkownika',
                 description: 'Pobierz wszystkie notatki użytkownika.',
+                tags: ['Notes'],
                 responses: {
                     200: {
                         description: 'Notatki pobrane',
@@ -354,6 +357,7 @@ export const swaggerDocument: OpenAPIObject = {
                         },
                     },
                 },
+                tags: ['Notes'],
                 responses: {
                     200: {
                         description: 'Notatka usunięta',
@@ -372,7 +376,7 @@ export const swaggerDocument: OpenAPIObject = {
                 ],
             },
         },
-        '/notes/{id}': {
+        '/api/notes/{id}': {
             get: {
                 summary: 'Pobierz notatki dla miasta',
                 description: 'Zwraca notatki użytkownika dla podanego miasta.',
@@ -384,6 +388,7 @@ export const swaggerDocument: OpenAPIObject = {
                         schema: { type: 'string' },
                     },
                 ],
+                tags: ['Notes'],
                 responses: {
                     200: {
                         description: 'Notatki pobrane',
@@ -409,6 +414,7 @@ export const swaggerDocument: OpenAPIObject = {
                         schema: { type: 'string' },
                     },
                 ],
+                tags: ['Notes'],
                 responses: {
                     200: {
                         description: 'Notatki usunięte',
@@ -447,6 +453,7 @@ export const swaggerDocument: OpenAPIObject = {
                         },
                     },
                 },
+                tags: ['Notes'],
                 responses: {
                     200: {
                         description: 'Notatka zaktualizowana',
@@ -474,6 +481,7 @@ export const swaggerDocument: OpenAPIObject = {
                         schema: { type: 'string' },
                     },
                 ],
+                tags: ['City'],
                 responses: {
                     200: {
                         description: 'Miasto znalezione',
@@ -496,7 +504,7 @@ export const swaggerDocument: OpenAPIObject = {
             },
         },
     },
-    components:{
+    components: {
         securitySchemes: {
             bearerAuth: {
                 type: 'http',
@@ -504,5 +512,16 @@ export const swaggerDocument: OpenAPIObject = {
                 bearerFormat: 'JWT',
             },
         },
-    }
+    },
+    tags: [
+        {
+            name: 'Auth',
+        },
+        {
+            name: 'Notes',
+        },
+        {
+            name: 'City',
+        },
+    ],
 };
