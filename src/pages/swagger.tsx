@@ -15,7 +15,7 @@ export default function SwaggerPage(spec ) {
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-  const res = await fetch('http://localhost:3000/api/swagger');
+  const res = await fetch('./api/swagger');
   const spec = await res.json();
 
   return {
