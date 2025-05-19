@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authenticateUser } from '../../../pages/api/authenticateUser';
+import { authenticateUser } from '../../src/pages/api/authenticateUser';
 import { createMocks, MockResponse } from 'node-mocks-http';
 import jwt from 'jsonwebtoken'; 
 

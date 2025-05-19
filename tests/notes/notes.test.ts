@@ -1,9 +1,9 @@
-jest.mock('../../../pages/api/authenticateUser', () => ({
+jest.mock('../../src/pages/api/authenticateUser', () => ({
     authenticateUser: jest.fn(),
   }));
   
-  import { authenticateUser } from '../../../pages/api/authenticateUser';
-  import handler from '../../../pages/api/notes/index';
+  import { authenticateUser } from '../../src/pages/api/authenticateUser';
+  import handler from '../../src/pages/api/notes/index';
   import { createMocks } from 'node-mocks-http';
   import { PrismaClient } from '@prisma/client';
   

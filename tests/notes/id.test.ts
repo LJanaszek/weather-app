@@ -1,4 +1,4 @@
-import * as auth from '../../api/authenticateUser';
+import * as auth from '../../src/pages/api/authenticateUser';
 import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
 import { PrismaClient, Notes } from '@prisma/client';
 
