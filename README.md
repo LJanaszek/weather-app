@@ -120,9 +120,9 @@ yarn dev
 # testy jednostkowe w jest
 | nazwa testu  | działanie testu|
 |:-------------|:----------------|
-|[tests directory](./src/pages/tests/)                          |  folder z plikami testującymi logikę back-endu poprzez bibliotekę JEST|
-|[tests/mocks](./src/pages/tests/__mocks__/prisma.test.ts)      |  test mockujący cały ORM Prisma|
-|[tests/auth](./src/pages/tests/auth/authenticateUser.test.ts)  |  test sprawdzający działanie backend logic dla authenticateUser|
-|[tests/notes](./src/pages/tests/notes/id.test.ts)              |  test sprawdzający logikę tworzenia nowej notatki|
-|[tests/notes](./src/pages/tests/notes/notes.test.ts)           |  test sprawdzający usuwanie, edytowanie i wyciąganie notatek|
-|[tests/city](./src/pages/tests/city.test.ts)                   |  test sprawdzający logikę rozprowadzania danych o miastach i ich fetchowania|
+|[tests directory](./tests/)                          |  folder z plikami testującymi logikę back-endu poprzez bibliotekę JEST|
+|[tests/mocks](./tests/__mocks__/prisma.test.ts)      |  test mockujący cały ORM Prisma|
+|[tests/auth](./tests/auth/authenticateUser.test.ts)  |  test sprawdzający działanie backend logic dla authenticateUser|
+|[tests/notes](./tests/notes/id.test.ts)              |  test sprawdzający logikę tworzenia nowej notatki|
+|[tests/notes](./tests/notes/notes.test.ts)           |  test sprawdzający usuwanie, edytowanie i wyciąganie notatek|
+|[tests/city](./tests/city.test.ts)                   |  test sprawdzający logikę rozprowadzania danych o miastach i ich fetchowania|

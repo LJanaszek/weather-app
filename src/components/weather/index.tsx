@@ -279,7 +279,6 @@ export default function Weather() {
                     setCurrentNoteId(note.id as string);
                     setEditedNote(note.description as string)
                     setOpenPopup(true);
-                    setNotes(notes.filter((note) => note.id !== note.id))
                   }}
                 >Edytuj</button>
               </nav>
@@ -309,7 +308,7 @@ export default function Weather() {
                 <Button
                   variant="text"
                   color="warning"
-                  onClick={() => setOpenPopup(false)}>
+                  onClick={() => {setOpenPopup(false); fetchAllNotes()}}>
                   Anuluj
                 </Button>
               </nav>
